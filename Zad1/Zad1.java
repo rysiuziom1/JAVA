@@ -16,11 +16,12 @@ class Zad1
 			System.out.println("Arguments must be Integers");
 			System.exit(0);
 		}
-		
-		Equation equation = new Equation(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+
+		Equation equation = new Equation(Integer.parseInt(args[0]),
+		Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 		System.out.println(equation.print());
 	}
-	
+
 	static void validateArguments(String[] arguments) {
 		if(arguments.length < 3)
 			throw new InvalidParameterException();
@@ -43,17 +44,17 @@ class Equation {
 	private int delta = 0;
 	private double x1 = 0;
 	private double x2 = 0;
-	
+
 	Equation(int a, int b, int c)
 	{
 		A = a;
 		B = b;
 		C = c;
 		delta = B*B - 4*A*C;
-		
+
 		solveEquation();
 	}
-	
+
 	private void solveEquation()
 	{
 		if (A == 0 && B != 0 )
