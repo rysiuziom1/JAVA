@@ -15,20 +15,21 @@ class Zad2
 			System.exit(0);
 		}
 		catch(NegativeArraySizeException e) {
-			System.out.println("1st arguments must be higher than 2nd");
+			System.out.println("2nd arguments must be higher than 3rd");
 			System.exit(0);
 		}
-		
+
 		try {
-			MySubstring subString = new MySubstring(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+			MySubstring subString = new MySubstring(args[0],
+			Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 			System.out.println(subString.print());
 		}
 		catch(IndexOutOfBoundsException e) {
 			System.out.println("Index is out of bounds");
 			System.exit(0);
-		}		
+		}
 	}
-	
+
 	static void validateArguments(String[] arguments) {
 		if(arguments.length < 3)
 			throw new InvalidParameterException();
@@ -56,7 +57,7 @@ class MySubstring {
 		begin = b;
 		end = en;
 		len = end - begin + 1;
-		
+
 		try {
 			makeSubstring();
 		}
@@ -64,7 +65,7 @@ class MySubstring {
 			throw e;
 		}
 	}
-	
+
 	private void makeSubstring() {
 		char[] data;
 		data = new char[len];
@@ -82,7 +83,7 @@ class MySubstring {
 			throw e;
 		}
 	}
-	
+
 	public String print() {
 		return subText;
 	}
