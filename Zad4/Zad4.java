@@ -11,14 +11,15 @@ public class Zad4
 		String f_name_nio = new String("nowy_nio.txt");
 		int a_size = 1000, a_min = 0, a_max = 4000;
 		int[] tab = rand.ints(a_size, a_min, a_max).toArray();
-		
-		// ----------------------------------------------------------------------------------------------------------------
+
+		// -----------------------------------------------------------------------
 		// IO
-		// ----------------------------------------------------------------------------------------------------------------
+		// -----------------------------------------------------------------------
 		long ioStartTimeWrite = System.currentTimeMillis();
 		try
 		{
-			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f_name_io)));
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new
+			FileOutputStream(f_name_io)));
 			for(int i = 0; i < a_size; i++)
 			{
 				writer.write(Integer.toString(tab[i]));
@@ -39,7 +40,8 @@ public class Zad4
 		long ioStartTimeRead = System.currentTimeMillis();
 		try
 		{
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(f_name_io)));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new
+			FileInputStream(f_name_io)));
 			String line = null;
 			while((line = reader.readLine()) != null)
 				System.out.print(line + " ");
@@ -56,9 +58,9 @@ public class Zad4
 		}
 		long ioEndTimeRead = System.currentTimeMillis();
 		long ioTimeRead = ioEndTimeRead - ioStartTimeRead;
-		// ----------------------------------------------------------------------------------------------------------------
+		// -----------------------------------------------------------------------
 		// NIO
-		// ----------------------------------------------------------------------------------------------------------------
+		// -----------------------------------------------------------------------
 		Path path = null;
 		Charset charset = null;
 		long nioStartTimeWrite = System.currentTimeMillis();
@@ -107,9 +109,9 @@ public class Zad4
 		}
 		long nioEndTimeRead = System.currentTimeMillis();
 		long nioTimeRead = nioEndTimeRead - nioStartTimeRead;
-		
-		System.out.println("Czas pracy dla java.io*:\nZapis: " + ioTimeWrite + "\nOdczyt: " 
-			+ ioTimeRead +"\nCzas pracy dla java.nio*:\nZapis: " + nioTimeWrite + "\nOdczyt: " 
-			+ nioTimeRead + "\n*w ms");
+
+		System.out.println("Czas pracy dla java.io*:\nZapis: " + ioTimeWrite
+			+ "\nOdczyt: " + ioTimeRead +"\nCzas pracy dla java.nio*:\nZapis: "
+			+ nioTimeWrite + "\nOdczyt: " + nioTimeRead + "\n*w ms");
 	}
 }
