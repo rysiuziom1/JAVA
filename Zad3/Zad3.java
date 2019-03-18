@@ -13,17 +13,17 @@ public class Zad3
 			r_number = rand.nextInt(101);
 			do
 			{
-				System.out.print("Podaj liczbe: ");
+				System.out.print("Inupt number: ");
 				u_number = scan.nextInt();
 				if(u_number < r_number)
-					System.out.println("Podana przez Ciebie liczba jest mniejsza od wylosowanej");
+					System.out.println("Number is lower than random");
 				else if(u_number > r_number)
-					System.out.println("Podana przez Ciebie liczba jest wieksza od wylosowanej");
+					System.out.println("Number is higher than random");
 			} while(u_number != r_number);
-			System.out.println("Udalo Ci sie odgadnac liczbe! Chcesz zagrac ponownie?");
+			System.out.println("Congratulations! You guessed the number! Do you wanna play again?");
 			do
 			{
-				System.out.print("(Y - tak / N - nie): ");
+				System.out.print("(Y - yes / N - no): ");
 				repeat = String.valueOf(scan.next().charAt(0));
 			} while(!repeat.matches("[YyNn]"));
 		} while(repeat.matches("[Yy]"));
