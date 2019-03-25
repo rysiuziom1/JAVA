@@ -19,6 +19,7 @@ class Zad1
 
 		Equation equation = new Equation(Integer.parseInt(args[0]),
 		Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+		
 		System.out.println(equation.print());
 	}
 
