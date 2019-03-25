@@ -1,12 +1,14 @@
 import java.util.Random;
 import java.util.Scanner;
+import java.util.InputMismatchException;
+
 public class Zad3
 {
 	public static void main(String[] args)
 	{
 		Random rand = new Random();
 		Scanner scan = new Scanner(System.in);
-		int r_number = 0, u_number = 0;
+		int r_number = 0, u_number = 0, counter = 0;
 		String repeat = "y";
 		do
 		{
@@ -14,13 +16,24 @@ public class Zad3
 			do
 			{
 				System.out.print("Inupt number: ");
-				u_number = scan.nextInt();
-				if(u_number < r_number)
-					System.out.println("Number is lower than random");
-				else if(u_number > r_number)
-					System.out.println("Number is higher than random");
+				try
+				{
+					u_number = scan.nextInt();
+					if(u_number < r_number)
+						System.out.println("Number is lower than random");
+					else if(u_number > r_number)
+						System.out.println("Number is higher than random");
+					counter++;
+				}
+				catch(InputMismatchException e)
+				{
+					System.out.println("Inputed value isn't a number. Try again.");
+					scan.nextLine();
+				}
 			} while(u_number != r_number);
-			System.out.println("Congratulations! You guessed the number! Do you wanna play again?");
+			System.out.println("Congratulations! You guessed the number in "
+			+ counter + " tries! Do you wanna play again?");
+			counter = 0;
 			do
 			{
 				System.out.print("(Y - yes / N - no): ");
