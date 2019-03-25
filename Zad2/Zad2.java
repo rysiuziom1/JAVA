@@ -12,7 +12,7 @@ class Zad2
 			System.exit(0);
 		}
 		catch(NumberFormatException e) {
-			System.out.println("1st arguments must be String, 2nd and 3rd Integer");
+			System.out.println("1st argument must be String, 2nd and 3rd Integer");
 			System.exit(0);
 		}
 		catch(NegativeArraySizeException e) {
