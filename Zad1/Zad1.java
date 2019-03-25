@@ -19,7 +19,7 @@ class Zad1
 
 		Equation equation = new Equation(Integer.parseInt(args[0]),
 		Integer.parseInt(args[1]), Integer.parseInt(args[2]));
-		
+
 		System.out.println(equation.print());
 	}
 
@@ -72,6 +72,8 @@ class Equation {
 	}
 	public String print()
 	{
+		if(A == 0 && B == 0 && C == 0)
+			return "Your equation has infinity solutions";
 		if(delta > 0 && A != 0)
 			return "Your equation has two solutions: x1 = " + x1 + ", x2 = " + x2;
 		else if(delta == 0 || A == 0)
