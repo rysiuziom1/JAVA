@@ -2,8 +2,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
-public class Zad3
-{
+public class Zad3 {
 	public static void main(String[] args)
 	{
 		Random rand = new Random();
@@ -32,7 +31,7 @@ public class Zad3
 				}
 			} while(u_number != r_number);
 			System.out.println("Congratulations! You guessed the number in "
-			+ counter + " tries! Do you wanna play again?");
+			+ counter + " tries! Do you want play again?");
 			counter = 0;
 			do
 			{

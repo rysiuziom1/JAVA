@@ -1,25 +1,30 @@
 import java.io.*;
 import java.nio.file.*;
 import java.nio.charset.*;
-import java.util.*;
+import java.util.Random;
 public class Zad4
 {
 	public static void main(String[] args)
 	{
 		Random rand = new Random();
-		String f_name_io = new String("nowy_io.txt");
-		String f_name_nio = new String("nowy_nio.txt");
+		String f_name_io = new String("new_io.txt");
+		String f_name_nio = new String("new_nio.txt");
 		int a_size = 1000, a_min = 0, a_max = 4000;
 		int[] tab = rand.ints(a_size, a_min, a_max).toArray();
 
 		// -----------------------------------------------------------------------
 		// IO
 		// -----------------------------------------------------------------------
-		long ioStartTimeWrite = System.currentTimeMillis();
+		Timer ioWriteTime = new Timer();
+		Timer ioReadTime = new Timer();
+		Timer nioWriteTime = new Timer();
+		Timer nioReadTime = new Timer();
+		ioWriteTime.start();
 		try
 		{
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new
 			FileOutputStream(f_name_io)));
+
 			for(int i = 0; i < a_size; i++)
 			{
 				writer.write(Integer.toString(tab[i]));
@@ -29,19 +34,19 @@ public class Zad4
 		}
 		catch(FileNotFoundException e)
 		{
-			System.out.println("Nie udalo sie otworzyc pliku do zapisu");
+			System.out.println("Can't open file to write");
 		}
 		catch(IOException e)
 		{
-			System.out.println("Blad zapisu do pliku");
+			System.out.println("Write file error");
 		}
-		long ioEndTimeWrite = System.currentTimeMillis();
-		long ioTimeWrite = ioEndTimeWrite - ioStartTimeWrite;
-		long ioStartTimeRead = System.currentTimeMillis();
+		ioWriteTime.stop();
+		ioReadTime.start();
 		try
 		{
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new
 			FileInputStream(f_name_io)));
+
 			String line = null;
 			while((line = reader.readLine()) != null)
 				System.out.print(line + " ");
@@ -50,20 +55,19 @@ public class Zad4
 		}
 		catch(FileNotFoundException e)
 		{
-			System.out.println("Nie udalo sie otworzyc pliku do odczytu");
+			System.out.println("Can't open file to write");
 		}
 		catch(IOException e)
 		{
-			System.out.println("Blad odczytu z pliku");
+			System.out.println("Read file error");
 		}
-		long ioEndTimeRead = System.currentTimeMillis();
-		long ioTimeRead = ioEndTimeRead - ioStartTimeRead;
+		ioReadTime.stop();
 		// -----------------------------------------------------------------------
 		// NIO
 		// -----------------------------------------------------------------------
 		Path path = null;
 		Charset charset = null;
-		long nioStartTimeWrite = System.currentTimeMillis();
+		nioWriteTime.start();
 		try
 		{
 			charset = Charset.forName("US-ASCII");
@@ -71,11 +75,11 @@ public class Zad4
 		}
 		catch(IllegalCharsetNameException e)
 		{
-			System.out.println("Nieznany typ kodowania");
+			System.out.println("Unknown coding");
 		}
 		catch(InvalidPathException e)
 		{
-			System.out.println("Invalid Path");
+			System.out.println("Invalid path");
 		}
 		try
 		{
@@ -91,9 +95,8 @@ public class Zad4
 		{
 			System.out.println("I/O Error");
 		}
-		long nioEndTimeWrite = System.currentTimeMillis();
-		long nioTimeWrite = nioEndTimeWrite - nioStartTimeWrite;
-		long nioStartTimeRead = System.currentTimeMillis();
+		nioWriteTime.stop();
+		nioReadTime.start();
 		try
 		{
 			BufferedReader reader = Files.newBufferedReader(path, charset);
@@ -105,13 +108,33 @@ public class Zad4
 		}
 		catch(IOException e)
 		{
-			System.out.println("Blad odczytu z pliku");
+			System.out.println("Read file error");
 		}
-		long nioEndTimeRead = System.currentTimeMillis();
-		long nioTimeRead = nioEndTimeRead - nioStartTimeRead;
+		nioReadTime.stop();
 
-		System.out.println("Czas pracy dla java.io*:\nZapis: " + ioTimeWrite
-			+ "\nOdczyt: " + ioTimeRead +"\nCzas pracy dla java.nio*:\nZapis: "
-			+ nioTimeWrite + "\nOdczyt: " + nioTimeRead + "\n*w ms");
+		System.out.println("Duration for java.io*:\nWrite: " + ioWriteTime.duration()
+			+ "\nRead: " + ioReadTime.duration() +"\nDuration for java.nio*:\nWrite: "
+			+ nioWriteTime.duration() + "\nRead: " + nioReadTime.duration() + "\n*in ms");
+	}
+}
+
+class Timer {
+	private long startTime = 0;
+	private long endTime = 0;
+
+	Timer(){};
+	public void start()
+	{
+		startTime = System.currentTimeMillis();
+	}
+
+	public void stop()
+	{
+		endTime = System.currentTimeMillis();
+	}
+
+	public long duration()
+	{
+		return endTime - startTime;
 	}
 }
