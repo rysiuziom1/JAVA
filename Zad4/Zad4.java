@@ -9,8 +9,8 @@ public class Zad4
 		Random rand = new Random();
 		String f_name_io = new String("new_io.txt");
 		String f_name_nio = new String("new_nio.txt");
-		int a_size = 1000, a_min = 0, a_max = 4000;
-		int[] tab = rand.ints(a_size, a_min, a_max).toArray();
+		int a_size = 1000;
+		RandomString randString = new RandomString(a_size);
 
 		// -----------------------------------------------------------------------
 		// IO
@@ -24,12 +24,7 @@ public class Zad4
 		{
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new
 			FileOutputStream(f_name_io)));
-
-			for(int i = 0; i < a_size; i++)
-			{
-				writer.write(Integer.toString(tab[i]));
-				writer.newLine();
-			}
+			writer.write(randString.returnString());
 			writer.close();
 		}
 		catch(FileNotFoundException e)
@@ -84,11 +79,7 @@ public class Zad4
 		try
 		{
 			BufferedWriter writer = Files.newBufferedWriter(path, charset);
-			for(int i = 0; i < a_size; i++)
-			{
-				writer.write(Integer.toString(tab[i]));
-				writer.newLine();
-			}
+			writer.write(randString.returnString());
 			writer.close();
 		}
 		catch(IOException e)
@@ -115,6 +106,25 @@ public class Zad4
 		System.out.println("Duration for java.io*:\nWrite: " + ioWriteTime.duration()
 			+ "\nRead: " + ioReadTime.duration() +"\nDuration for java.nio*:\nWrite: "
 			+ nioWriteTime.duration() + "\nRead: " + nioReadTime.duration() + "\n*in ms");
+	}
+}
+
+class RandomString {
+	private String randText;
+	private int leftLimit = 33;
+	private int rightLimit = 126;
+
+	RandomString(int len) {
+		Random random = new Random();
+		StringBuilder buffer = new StringBuilder(len);
+		for(int i = 0; i < len; i++) {
+			int randomInt = leftLimit + (int)(random.nextFloat() * (rightLimit - leftLimit + 1));
+			buffer.append((char) randomInt);
+		}
+		randText = buffer.toString();
+	}
+	String returnString() {
+		return randText;
 	}
 }
 
