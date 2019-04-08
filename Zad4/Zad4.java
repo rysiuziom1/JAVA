@@ -7,10 +7,10 @@ public class Zad4
 	public static void main(String[] args)
 	{
 		Random rand = new Random();
-		String f_name_io = new String("new_io.txt");
-		String f_name_nio = new String("new_nio.txt");
-		int a_size = 1000;
-		RandomString randString = new RandomString(a_size);
+		String fNameIo = new String("new_io.txt");
+		String fNameNio = new String("new_nio.txt");
+		int aSize = 1000;
+		RandomString randString = new RandomString(aSize);
 
 		// -----------------------------------------------------------------------
 		// IO
@@ -23,7 +23,7 @@ public class Zad4
 		try
 		{
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new
-			FileOutputStream(f_name_io)));
+			FileOutputStream(fNameIo)));
 			writer.write(randString.returnString());
 			writer.close();
 		}
@@ -40,7 +40,7 @@ public class Zad4
 		try
 		{
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new
-			FileInputStream(f_name_io)));
+			FileInputStream(fNameIo)));
 
 			String line = null;
 			while((line = reader.readLine()) != null)
@@ -66,7 +66,7 @@ public class Zad4
 		try
 		{
 			charset = Charset.forName("US-ASCII");
-			path = Paths.get(f_name_nio);
+			path = Paths.get(fNameNio);
 		}
 		catch(IllegalCharsetNameException e)
 		{

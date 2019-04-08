@@ -7,20 +7,20 @@ public class Zad3 {
 	{
 		Random rand = new Random();
 		Scanner scan = new Scanner(System.in);
-		int r_number = 0, u_number = 0, counter = 0;
+		int randomNumber = 0, userNumber = 0, counter = 0;
 		String repeat = "y";
 		do
 		{
-			r_number = rand.nextInt(101);
+			randomNumber = rand.nextInt(101);
 			do
 			{
 				System.out.print("Inupt number: ");
 				try
 				{
-					u_number = scan.nextInt();
-					if(u_number < r_number)
+					userNumber = scan.nextInt();
+					if(userNumber < randomNumber)
 						System.out.println("Number is lower than random");
-					else if(u_number > r_number)
+					else if(userNumber > randomNumber)
 						System.out.println("Number is higher than random");
 					counter++;
 				}
@@ -29,7 +29,7 @@ public class Zad3 {
 					System.out.println("Inputed value isn't a number. Try again.");
 					scan.nextLine();
 				}
-			} while(u_number != r_number);
+			} while(userNumber != randomNumber);
 			System.out.println("Congratulations! You guessed the number in "
 			+ counter + " tries! Do you want play again?");
 			counter = 0;
