@@ -50,7 +50,7 @@ public class Zad4
 		}
 		catch(FileNotFoundException e)
 		{
-			System.out.println("Can't open file to write");
+			System.out.println("Can't open file to read");
 		}
 		catch(IOException e)
 		{
