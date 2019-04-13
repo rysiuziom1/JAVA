@@ -4,6 +4,8 @@ import java.util.Random;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.JFrame;
+
 public class Zad5
 {
 	public static void main(String[] args)
@@ -41,16 +43,64 @@ public class Zad5
 			}
 			String fileAsString = sb.toString();
 			reader.close();
-
-			System.out.print(fileAsString);
+			PrintStringByListener listener = new PrintStringByListener(fileAsString);
+			JFrame frame = new JFrame("Key Listener");
+			frame.addKeyListener(listener);
+			frame.pack();
+			frame.setVisible(true);
 		}
 		catch(FileNotFoundException e)
 		{
 			System.out.println("Can't open file to read");
+			System.exit(0);
 		}
 		catch(IOException e)
 		{
 			System.out.println("Read file error");
+			System.exit(0);
 		}
 	}
+}
+
+class PrintStringByListener implements KeyListener {
+	private String stringToPrint;
+	private Random rand;
+	private int startIndex = 0;
+
+	PrintStringByListener(String s)
+	{
+		stringToPrint = s;
+		rand = new Random();
+	}
+
+	void printRandom()
+	{
+		int number = rand.nextInt(4)+1;
+		try {
+			System.out.print(stringToPrint.substring(startIndex, startIndex+number));
+			startIndex += number;
+		}
+		catch(IndexOutOfBoundsException e) {
+			System.out.print(stringToPrint.substring(startIndex));
+			throw e;
+		}
+
+	}
+
+	@Override
+	public void keyReleased(KeyEvent event)
+	{
+		try {
+			printRandom();
+		}
+		catch(IndexOutOfBoundsException e) {
+			System.exit(0);
+		}
+	}
+
+	@Override
+	public void keyPressed(KeyEvent event){}
+
+	@Override
+	public void keyTyped(KeyEvent event){}
 }
