@@ -37,11 +37,7 @@ public class Zad5 {
 			}
 			String fileAsString = sb.toString();
 			reader.close();
-			PrintStringUsingListener listener = new PrintStringUsingListener(fileAsString);
-			JFrame frame = new JFrame("Key Listener");
-			frame.addKeyListener(listener);
-			frame.pack();
-			frame.setVisible(true);
+			MyKeyListener frame = new MyKeyListener("Key Listener", fileAsString);
 		}
 		catch(FileNotFoundException e) {
 			System.out.println("Can't open file to read");
@@ -54,14 +50,19 @@ public class Zad5 {
 	}
 }
 
-class PrintStringUsingListener implements KeyListener {
+class MyKeyListener extends JFrame implements KeyListener {
 	private String stringToPrint;
 	private Random rand;
-	private int startIndex = 0;
+	private int startIndex;
 
-	PrintStringUsingListener(String s) {
+	MyKeyListener(String title, String s) {
+		super(title);
 		stringToPrint = s;
 		rand = new Random();
+		startIndex = 0;
+		addKeyListener(this);
+		pack();
+		setVisible(true);
 	}
 
 	void printRandom() {
@@ -72,17 +73,19 @@ class PrintStringUsingListener implements KeyListener {
 		}
 		catch(IndexOutOfBoundsException e) {
 			System.out.print(stringToPrint.substring(startIndex));
+			startIndex = stringToPrint.length();
 			throw e;
-		} 
-	}
+		}
+	} 
 
 	@Override
 	public void keyReleased(KeyEvent event) {
 		try {
 			printRandom();
 		}
-		catch(IndexOutOfBoundsException e) {
-			System.exit(0);
+		catch(IndexOutOfBoundsException e) { 
+			removeKeyListener(this);
+			dispose();
 		}
 	}
 
