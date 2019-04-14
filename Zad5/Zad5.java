@@ -6,33 +6,27 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
-public class Zad5
-{
-	public static void main(String[] args)
-	{
+public class Zad5 {
+	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
 		String userPath = new String("");
 		String pathToFileWithUserPath = new String("path.txt");
 		System.out.print("Input file path: ");
 		userPath = scan.nextLine();
-		try
-		{
+		try {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new
 			FileOutputStream(pathToFileWithUserPath)));
 			writer.write(userPath);
 			writer.close();
 		}
-		catch(FileNotFoundException e)
-		{
+		catch(FileNotFoundException e) {
 			System.out.println("Can't open file to write");
 		}
-		catch(IOException e)
-		{
+		catch(IOException e) {
 			System.out.println("Write file error");
 		}
 
-		try
-		{
+		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new
 			FileInputStream(userPath)));
 
@@ -49,13 +43,11 @@ public class Zad5
 			frame.pack();
 			frame.setVisible(true);
 		}
-		catch(FileNotFoundException e)
-		{
+		catch(FileNotFoundException e) {
 			System.out.println("Can't open file to read");
 			System.exit(0);
 		}
-		catch(IOException e)
-		{
+		catch(IOException e) {
 			System.out.println("Read file error");
 			System.exit(0);
 		}
@@ -67,14 +59,12 @@ class PrintStringUsingListener implements KeyListener {
 	private Random rand;
 	private int startIndex = 0;
 
-	PrintStringUsingListener(String s)
-	{
+	PrintStringUsingListener(String s) {
 		stringToPrint = s;
 		rand = new Random();
 	}
 
-	void printRandom()
-	{
+	void printRandom() {
 		int number = rand.nextInt(4)+1;
 		try {
 			System.out.print(stringToPrint.substring(startIndex, startIndex+number));
@@ -83,13 +73,11 @@ class PrintStringUsingListener implements KeyListener {
 		catch(IndexOutOfBoundsException e) {
 			System.out.print(stringToPrint.substring(startIndex));
 			throw e;
-		}
-
+		} 
 	}
 
 	@Override
-	public void keyReleased(KeyEvent event)
-	{
+	public void keyReleased(KeyEvent event) {
 		try {
 			printRandom();
 		}
