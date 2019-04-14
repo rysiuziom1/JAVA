@@ -43,7 +43,7 @@ public class Zad5
 			}
 			String fileAsString = sb.toString();
 			reader.close();
-			PrintStringByListener listener = new PrintStringByListener(fileAsString);
+			PrintStringUsingListener listener = new PrintStringUsingListener(fileAsString);
 			JFrame frame = new JFrame("Key Listener");
 			frame.addKeyListener(listener);
 			frame.pack();
@@ -62,12 +62,12 @@ public class Zad5
 	}
 }
 
-class PrintStringByListener implements KeyListener {
+class PrintStringUsingListener implements KeyListener {
 	private String stringToPrint;
 	private Random rand;
 	private int startIndex = 0;
 
-	PrintStringByListener(String s)
+	PrintStringUsingListener(String s)
 	{
 		stringToPrint = s;
 		rand = new Random();
