@@ -6,6 +6,7 @@ import java.io.*;
 import java.text.*; 
 import java.util.*; 
 import java.net.*; 
+import java.util.concurrent.TimeUnit;
 
 // Server class 
 public class Server 
@@ -51,9 +52,7 @@ public class Server
 
 // ClientHandler class 
 class ClientHandler extends Thread 
-{ 
-	DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd"); 
-	DateFormat fortime = new SimpleDateFormat("hh:mm:ss"); 
+{
 	final DataInputStream dis; 
 	final DataOutputStream dos; 
 	final Socket s; 
@@ -86,17 +85,18 @@ class ClientHandler extends Thread
 					this.s.close(); 
 					System.out.println("Connection closed"); 
 					break; 
-				} 
-				dos.writeUTF("Type message:");
-				received = dis.readUTF();
-				this.sleep(2000);
-				//this.sleep(200);
-				dos.writeUTF(received);
+				}
+				else if(received.equalsIgnoreCase("Message"))
+				{
+					dos.writeUTF("Type message:");
+					received = dis.readUTF();
+					//this.wait(200);
+					dos.writeUTF(received);
+				}
 
 			} catch (IOException e) { 
 				e.printStackTrace(); 
 			}
-			catch(InterruptedException e) {}
 		} 
 		
 		try
@@ -109,4 +109,4 @@ class ClientHandler extends Thread
 			e.printStackTrace(); 
 		} 
 	} 
-} 
+}

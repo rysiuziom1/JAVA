@@ -48,8 +48,10 @@ public class Client
 					System.out.println(received);
 					tosend = scn.nextLine();
 					dos.writeUTF(tosend);
-					ServerListener serverListener = new ServerListener(dis, s);
-					serverListener.start();
+					received = dis.readUTF();
+					JFrame frame = new JFrame(received);
+					frame.pack();
+					frame.setVisible(true);
 				}
 			} 
 			
@@ -76,33 +78,23 @@ class ServerListener extends Thread {
 	public void run() 
 	{ 
 		String received = null; 
-		
-
-		while (true) 
-		{ 
+		while(true)
+		{
 			try {  
-				
-				// receive the answer from client 
+				// receive the answer from server 
 				received = dis.readUTF(); 
-				
-				if(received.length() > 1) 
-				{ 
+				if(received.length() > 0) 
+				{
 					JFrame frame = new JFrame(received);
-					break; 
-				} 
- 
-			} catch (IOException e) { 
-				e.printStackTrace(); 
+					frame.pack();
+					frame.setVisible(true);
+					break;
+				}
 			} 
-		} 
-		
-		try
-		{ 
-			// closing resources 
-			this.dis.close(); 
-			
-		}catch(IOException e){ 
-			e.printStackTrace(); 
+
+			catch (IOException e) { 
+				e.printStackTrace(); 
+			}
 		} 
 	} 
 }
