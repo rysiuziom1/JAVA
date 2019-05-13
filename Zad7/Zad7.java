@@ -22,7 +22,7 @@ public class Zad7 {
 		dictionary.put(secondCompany.zwrocNumer(), secondCompany);
 
 		for(Map.Entry<NrTelefoniczny, Wpis> entry : dictionary.entrySet()) {
-			System.out.println(entry.getKey().toString() + " => " + entry.getValue().opis());
+			System.out.println(entry.getKey() + " => " + entry.getValue().opis());
 		}
 	}
 }
