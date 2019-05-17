@@ -6,7 +6,8 @@ import java.io.*;
 import java.text.*; 
 import java.util.*; 
 import java.net.*; 
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 // Server class 
 public class Server 
@@ -70,7 +71,7 @@ class ClientHandler extends Thread
 	public void run() 
 	{ 
 		String received; 
-		String toreturn; 
+		String toReturn = null; 
 		while (true) 
 		{ 
 			try {  
@@ -90,23 +91,49 @@ class ClientHandler extends Thread
 				{
 					dos.writeUTF("Type message:");
 					received = dis.readUTF();
-					//this.wait(200);
-					dos.writeUTF(received);
+					toReturn = received;
+					new Reminder(5, dos, dis, s, toReturn);
+					break;
 				}
 
 			} catch (IOException e) { 
 				e.printStackTrace(); 
 			}
 		} 
-		
-		try
-		{ 
-			// closing resources 
-			this.dis.close(); 
-			this.dos.close(); 
-			
-		}catch(IOException e){ 
-			e.printStackTrace(); 
-		} 
 	} 
+}
+
+class Reminder {
+	private Timer timer;
+	final String toReturn;
+	final DataOutputStream dos;
+	final DataInputStream dis;
+	final Socket s;
+
+	public Reminder(int seconds, DataOutputStream dos, DataInputStream dis, Socket s, String toReturn) {
+		timer = new Timer();
+		this.toReturn = toReturn;
+		timer.schedule(new RemindTask(), seconds*1000);
+		this.dos = dos;
+		this.dis = dis;
+		this.s = s;
+		System.out.println("--------------------REMINDER RUNNING----------------------");
+	}
+
+	class RemindTask extends TimerTask {
+		@Override
+		public void run() {
+			try {
+				dos.writeUTF(toReturn);
+				dos.close();
+				dis.close();
+				s.close();
+				System.out.println("-------------------------TASK DONE-----------------------");
+				timer.cancel();
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }

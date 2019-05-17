@@ -31,27 +31,28 @@ public class Client
 			{ 
 				String received = dis.readUTF();
 				System.out.println(received);
-				String tosend = scn.nextLine(); 
-				dos.writeUTF(tosend);
+				String toSend = scn.nextLine(); 
+				dos.writeUTF(toSend);
 				// If client sends exit,close this connection 
 				// and then break from the while loop 
-				if(tosend.equalsIgnoreCase("Exit")) 
+				if(toSend.equalsIgnoreCase("Exit")) 
 				{ 
 					System.out.println("Closing this connection : " + s); 
 					s.close(); 
 					System.out.println("Connection closed"); 
 					break; 
 				}
-				else if(tosend.equalsIgnoreCase("Message"))	
+				else if(toSend.equalsIgnoreCase("Message"))	
 				{	
 					received = dis.readUTF();
 					System.out.println(received);
-					tosend = scn.nextLine();
-					dos.writeUTF(tosend);
-					received = dis.readUTF();
-					JFrame frame = new JFrame(received);
-					frame.pack();
-					frame.setVisible(true);
+					toSend = scn.nextLine();
+					dos.writeUTF(toSend);
+					ServerListener serverListener = new ServerListener(dis, dos, s);
+					serverListener.start();
+					s = new Socket(ip, 5056);
+					dis = new DataInputStream(s.getInputStream());
+					dos = new DataOutputStream(s.getOutputStream());
 				}
 			} 
 			
@@ -68,9 +69,11 @@ public class Client
 class ServerListener extends Thread {
 	final Socket s;
 	final DataInputStream dis;
-	public ServerListener(DataInputStream dis, Socket s) {
+	final DataOutputStream dos;
+	public ServerListener(DataInputStream dis, DataOutputStream dos, Socket s) {
 		this.s = s;
 		this.dis = dis;
+		this.dos = dos;
 	}
 
 
@@ -78,23 +81,25 @@ class ServerListener extends Thread {
 	public void run() 
 	{ 
 		String received = null; 
-		while(true)
-		{
-			try {  
-				// receive the answer from server 
-				received = dis.readUTF(); 
-				if(received.length() > 0) 
-				{
-					JFrame frame = new JFrame(received);
-					frame.pack();
-					frame.setVisible(true);
-					break;
-				}
+		try {
+			while(true)
+			{ 
+					// receive the answer from server 
+					received = dis.readUTF(); 
+					if(received.length() > 1) 
+					{
+						JFrame frame = new JFrame(received);
+						frame.pack();
+						frame.setVisible(true);
+						break;
+					}
 			} 
-
-			catch (IOException e) { 
-				e.printStackTrace(); 
-			}
-		} 
+			dis.close();
+			dos.close();
+			s.close();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	} 
 }
