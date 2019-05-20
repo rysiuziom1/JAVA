@@ -7,48 +7,56 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.concurrent.Semaphore;
 
 public class Server
 {
 	public static void main(String[] args)
 	{
 		// server is listening on port 5056
-		ServerSocket ss = new ServerSocket(5056);
-
-		// infinity loop to getting clients requests
-		while(true)
+		try
 		{
-			// declaring socket for comunication
-			Socket sComunication = null;
-			// declaring socket for norifier
-			Socket sNotifier = null;
+			ServerSocket ss1 = new ServerSocket(5056);
+			ServerSocket ss2 = new ServerSocket(5057);
 
-			try
+			// infinity loop to getting clients requests
+			while(true)
 			{
-				// accepting client request
-				sComuniaction = ss.accept();
-				sNotifier = ss.accept();
+				// declaring socket for communication
+				Socket sCommunication = null;
+				Socket sNotifier = null;
+				// declaring socket for notifier
 
-				System.out.println("A new Client " + sComuniaction + " is connected");
-				ClientHandler cHandler = new ClientHandler(sComuniaction);
-				ClientNotifier cNotifier = new ClientNotifier(sNotifier);
+				// accepting client request
+				sCommunication = ss1.accept();
+				ObjectOutputStream oosCommunication = new ObjectOutputStream(sCommunication.getOutputStream());
+				ObjectInputStream oisCommunication = new ObjectInputStream(sCommunication.getInputStream());
+				System.out.println("A new Client " + sCommunication + " is connected");
+
+				sNotifier = ss2.accept();
+				ObjectOutputStream oosNotifier = new ObjectOutputStream(sNotifier.getOutputStream());
+				ObjectInputStream oisNotifier = new ObjectInputStream(sNotifier.getInputStream());
+				System.out.println("Notifier for Client " + sNotifier + " is declared");
+				Semaphore sem = new Semaphore(1);
+				SortedMap<Date, String> listOfNotifies = new TreeMap<Date, String>();
+				// running client handler
+				Thread cHandler = new ClientHandler(sCommunication, sNotifier, oosCommunication, oisCommunication, oosNotifier, listOfNotifies, sem);
+				Thread cNotifier = new ClientNotifier(sNotifier, oosNotifier, oisNotifier, listOfNotifies, sem);
 				cHandler.start();
 				cNotifier.start();
-			}
 
-			catch(IOException e)
-			{
-				e.printStackTrace();
+				System.out.println("Notifier for Client " + sCommunication + " is running");
 			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+		}
+		catch(IOException e)
+		{
+			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }
 
-class Notify
+class Notify implements Serializable
 {
 	private String text;
 	private Date date;
@@ -73,54 +81,77 @@ class Notify
 class ClientNotifier extends Thread
 {
 	final Socket sNotifier;
-	private ObjectInputStream ois;
-	private ObjectOutputStream oos;
+	final ObjectInputStream ois;
+	final ObjectOutputStream oos;
 	private SortedMap<Date, String> listOfNotifies;
+	private Semaphore sem;
 
-	public ClientNotifier(Socket sNotifier)
+	public ClientNotifier(Socket sNotifier, ObjectOutputStream oosNotifier, ObjectInputStream oisNotifier, SortedMap<Date, String> listOfNotifies, Semaphore sem) throws IOException
 	{
 		this.sNotifier = sNotifier;
-		ois = new ObjectInputStream(sNotifier.getInputStream());
-		oos = new ObjectOutputStream(sNotifier.getOutputStream());
-		listOfNotifies = new TreeMap<Date, String>();
-	}
-
-	public void addNotify(Notify notify)
-	{
-		listOfNotifies.put(notify.returnNotifyDate, notify.returnNotifyText);
+		this.oos = oosNotifier;
+		this.ois = oisNotifier;
+		this.listOfNotifies = listOfNotifies;
+		this.sem = sem;
 	}
 
 	@Override
 	public void run()
 	{
-		SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm:ss");
-		String text;
-		Date date;
-		oos.writeUTF("Type a message:");
-		text = ois.readUTF();
-		oos.writeUTF("Type a date:");
-		date = dateformat.parse(ois.readUTF());
-		Notify notify = new Notify(date, text);
-		addNotify(notify);
+		while(!this.interrupted())
+		{
+			try
+			{
+				sem.acquire();
+				Date date = new Date();
+				if(sNotifier.isClosed())
+					this.interrupt();
+				if(listOfNotifies.size() > 0)
+				{
+					if(date.compareTo(listOfNotifies.firstKey()) >= 0)
+					{
+						oos.writeObject(listOfNotifies.remove(listOfNotifies.firstKey()));
+						System.out.println("Notification sended");
+					}
+				}
+				sem.release();
+				this.sleep(200);
+			}
+			catch(ClassCastException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(IOException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(InterruptedException e){}
+		}
 	}
-
 }
 
 class ClientHandler extends Thread
 {
-	final Socket sComuniaction;
-	private ObjectInputStream oisComunication;
-	private ObjectOutputStream oosComunication;
+	final Socket sCommunication;
+	final Socket sNotifier;
+	final ObjectInputStream oisCommunication;
+	final ObjectOutputStream oosCommunication;
+	final ObjectOutputStream oosNotifier;
+	private SortedMap<Date, String> listOfNotifies;
+	private Semaphore sem;
 
-	public ClientHandler(Socket sComuniaction, Socket sNotifier)
+	public ClientHandler(Socket sCommunication, Socket sNotifier, ObjectOutputStream oosCommunication, 
+		ObjectInputStream oisCommunication, ObjectOutputStream oosNotifier, SortedMap<Date, String> listOfNotifies, Semaphore sem) throws IOException
 	{
-		this.sComuniaction = sComuniaction;
+		this.sCommunication = sCommunication;
 		this.sNotifier = sNotifier;
-		this.oisComunication = new ObjectInputStream(sComuniaction.getInputStream());
-		this.oosComunication = new ObjectOutputStream(sComuniaction.getOutputStream());
-		this.oisNotifier = new ObjectInputStream(sNotifier.getInputStream());
-		this.oosNotifier = new ObjectOutputStream(sNotifier.getOutputStream());
-		notifier = new ClientNotifier(oisNotifier, oosNotifier);
+		this.oosCommunication = oosCommunication;
+		this.oisCommunication = oisCommunication;
+		this.oosNotifier = oosNotifier;
+		this.listOfNotifies = listOfNotifies;
+		this.sem = sem;
 	}
 
 	@Override
@@ -128,29 +159,71 @@ class ClientHandler extends Thread
 	{
 		while(true)
 		{
+			String received;
 			try
 			{
-				String received;
-				oosComunication.writeUTF("What do you want to do? [M] - Message, [E] - Exit");
-				received = oisComunication.readUTF();
+				oosCommunication.writeObject(new String("What do you want to do? [M] - Message, [E] - Exit"));
+				received = (String) oisCommunication.readObject();
 				if(received.equalsIgnoreCase("E"))
 				{
-					System.out.println("Closing connection for " + this.sComuniaction);
-					oisComunication.close();
-					oisNotifier.close();
-					oosComunication.close();
-					oosNotifier.close();
-					sComuniaction.close();
-					sNotifier.close();
+					System.out.println("Closing connection for " + this.sCommunication);
+					oisCommunication.close();
+					oosCommunication.close();
+					sCommunication.close();
 					System.out.println("Connection closed");
 					break;
 				}
 				else if(received.equalsIgnoreCase("M"))
 				{
-
+					oosCommunication.writeObject(new String("Type a message: "));
+					String message = (String) oisCommunication.readObject();
+					oosCommunication.writeObject(new String("Type a time (dd-MM-yyyy HH:mm:ss): "));
+					String timeString = (String) oisCommunication.readObject();
+					Date time = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").parse(timeString);
+					sem.acquire();
+					listOfNotifies.put(time, message);
+					System.out.println("Notifications in queue: " + listOfNotifies.size());
+					sem.release();
 				}
 			}
+			catch(IllegalThreadStateException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(IOException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(ParseException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(ClassNotFoundException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(InterruptedException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		try
+		{
+			sCommunication.close();
+			sNotifier.close();
+		}
+		catch(IOException e)
+		{
+			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }
+
+
 
