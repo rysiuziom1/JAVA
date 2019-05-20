@@ -37,8 +37,10 @@ public class Server
 				ObjectOutputStream oosNotifier = new ObjectOutputStream(sNotifier.getOutputStream());
 				ObjectInputStream oisNotifier = new ObjectInputStream(sNotifier.getInputStream());
 				System.out.println("Notifier for Client " + sNotifier + " is declared");
+				
 				Semaphore sem = new Semaphore(1);
 				SortedMap<Date, String> listOfNotifies = new TreeMap<Date, String>();
+
 				// running client handler
 				Thread cHandler = new ClientHandler(sCommunication, sNotifier, oosCommunication, oisCommunication, oosNotifier, listOfNotifies, sem);
 				Thread cNotifier = new ClientNotifier(sNotifier, oosNotifier, oisNotifier, listOfNotifies, sem);
@@ -52,82 +54,6 @@ public class Server
 		{
 			System.err.println(e.getMessage());
 			e.printStackTrace();
-		}
-	}
-}
-
-class Notify implements Serializable
-{
-	private String text;
-	private Date date;
-
-	public Notify(String text, Date date)
-	{
-		this.text = text;
-		this.date = date;
-	}
-
-	public Date returnNotifyDate()
-	{
-		return this.date;
-	}
-
-	public String returnNotifyText()
-	{
-		return this.text;
-	}
-}
-
-class ClientNotifier extends Thread
-{
-	final Socket sNotifier;
-	final ObjectInputStream ois;
-	final ObjectOutputStream oos;
-	private SortedMap<Date, String> listOfNotifies;
-	private Semaphore sem;
-
-	public ClientNotifier(Socket sNotifier, ObjectOutputStream oosNotifier, ObjectInputStream oisNotifier, SortedMap<Date, String> listOfNotifies, Semaphore sem) throws IOException
-	{
-		this.sNotifier = sNotifier;
-		this.oos = oosNotifier;
-		this.ois = oisNotifier;
-		this.listOfNotifies = listOfNotifies;
-		this.sem = sem;
-	}
-
-	@Override
-	public void run()
-	{
-		while(!this.interrupted())
-		{
-			try
-			{
-				sem.acquire();
-				Date date = new Date();
-				if(sNotifier.isClosed())
-					this.interrupt();
-				if(listOfNotifies.size() > 0)
-				{
-					if(date.compareTo(listOfNotifies.firstKey()) >= 0)
-					{
-						oos.writeObject(listOfNotifies.remove(listOfNotifies.firstKey()));
-						System.out.println("Notification sended");
-					}
-				}
-				sem.release();
-				this.sleep(200);
-			}
-			catch(ClassCastException e)
-			{
-				System.err.println(e.getMessage());
-				e.printStackTrace();
-			}
-			catch(IOException e)
-			{
-				System.err.println(e.getMessage());
-				e.printStackTrace();
-			}
-			catch(InterruptedException e){}
 		}
 	}
 }
@@ -170,6 +96,7 @@ class ClientHandler extends Thread
 					oisCommunication.close();
 					oosCommunication.close();
 					sCommunication.close();
+					sNotifier.close();
 					System.out.println("Connection closed");
 					break;
 				}
@@ -179,11 +106,16 @@ class ClientHandler extends Thread
 					String message = (String) oisCommunication.readObject();
 					oosCommunication.writeObject(new String("Type a time (dd-MM-yyyy HH:mm:ss): "));
 					String timeString = (String) oisCommunication.readObject();
-					Date time = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").parse(timeString);
+					SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+					dateFormat.setLenient(false);
+					Date time = dateFormat.parse(timeString);
+					if(DateValidator.validate(time))
+						throw new DateInPastException("Date in past");
 					sem.acquire();
 					listOfNotifies.put(time, message);
-					System.out.println("Notifications in queue: " + listOfNotifies.size());
+					System.out.println("Notifications in " + sNotifier + " queue: " + listOfNotifies.size());
 					sem.release();
+					oosCommunication.writeObject(new String("Notification added"));
 				}
 			}
 			catch(IllegalThreadStateException e)
@@ -198,7 +130,7 @@ class ClientHandler extends Thread
 			}
 			catch(ParseException e)
 			{
-				System.err.println(e.getMessage());
+				System.err.println("Invalid date format");
 				e.printStackTrace();
 			}
 			catch(ClassNotFoundException e)
@@ -210,6 +142,20 @@ class ClientHandler extends Thread
 			{
 				System.err.println(e.getMessage());
 				e.printStackTrace();
+			}
+			catch(DateInPastException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+				try
+				{
+					oosCommunication.writeObject(e.getMessage());
+				}
+				catch(IOException e2)
+				{
+					System.err.println(e2.getMessage());
+					e2.printStackTrace();
+				}
 			}
 		}
 		try
@@ -225,5 +171,101 @@ class ClientHandler extends Thread
 	}
 }
 
+class ClientNotifier extends Thread
+{
+	final Socket sNotifier;
+	final ObjectInputStream ois;
+	final ObjectOutputStream oos;
+	private SortedMap<Date, String> listOfNotifies;
+	private Semaphore sem;
+
+	public ClientNotifier(Socket sNotifier, ObjectOutputStream oosNotifier, ObjectInputStream oisNotifier, SortedMap<Date, String> listOfNotifies, Semaphore sem) throws IOException
+	{
+		this.sNotifier = sNotifier;
+		this.oos = oosNotifier;
+		this.ois = oisNotifier;
+		this.listOfNotifies = listOfNotifies;
+		this.sem = sem;
+	}
+
+	@Override
+	public void run()
+	{
+		while(!this.interrupted())
+		{
+			try
+			{
+				sem.acquire();
+				Date date = new Date();
+				if(sNotifier.isClosed())
+					this.interrupt();
+				if(listOfNotifies.size() > 0)
+				{
+					if(date.compareTo(listOfNotifies.firstKey()) >= 0)
+					{
+						oos.writeObject(listOfNotifies.remove(listOfNotifies.firstKey()));
+						System.out.println("Notification sended");
+						System.out.println("Notifications in " + sNotifier + " queue: " + listOfNotifies.size());
+					}
+				}
+				sem.release();
+				this.sleep(200);
+			}
+			catch(ClassCastException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(IOException e)
+			{
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
+			catch(InterruptedException e){}
+		}
+	}
+}
+
+
+class Notify implements Serializable
+{
+	private String text;
+	private Date date;
+
+	public Notify(String text, Date date)
+	{
+		this.text = text;
+		this.date = date;
+	}
+
+	public Date returnNotifyDate()
+	{
+		return this.date;
+	}
+
+	public String returnNotifyText()
+	{
+		return this.text;
+	}
+}
+
+class DateValidator
+{
+	static public boolean validate(Date date)
+	{
+		Date currentDate = new Date();
+		if(currentDate.compareTo(date) < 0)
+			return false;
+		return true;
+	}
+}
+
+class DateInPastException extends Exception
+{
+	public DateInPastException(String errorMessage)
+	{
+		super(errorMessage);
+	}
+}
 
 

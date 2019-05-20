@@ -3,7 +3,8 @@ import java.net.*;
 import java.util.Scanner;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
+import java.awt.Font;
  
 public class Client 
 {
@@ -48,15 +49,18 @@ public class Client
 					System.out.println(received);
 					toSend = scanner.nextLine();
 					oosCommunication.writeObject(toSend);
+					received = (String) oisCommunication.readObject();
+					System.out.println(received);
+					received = null;
 				}
 			}
 			catch(IOException e)
 			{
-				System.err.println("Blad I/O");
+				System.err.println(e.toString());
 			}
 			catch(ClassNotFoundException e)
 			{
-				System.err.println("Brak zadeklarowanej klasy");
+				System.err.println(e.toString());
 			}
 		}
 	}
@@ -88,9 +92,10 @@ class NotifyListener extends Thread
 				{
 					JFrame frame = new JFrame("Java notification");
 					JLabel label = new JLabel(received);
+					label.setFont(label.getFont().deriveFont(24.0f));
 					frame.getContentPane().add(label);
 					frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-					frame.getContentPane().setSize(250, 50);
+					frame.setLocationRelativeTo(null);
 					frame.pack();
 					frame.setVisible(true);
 					received = null;
@@ -103,7 +108,7 @@ class NotifyListener extends Thread
 		}
 		catch(ClassNotFoundException e)
 		{
-			System.err.println("Brak zadeklarowanej klasy");
+			System.err.println(e.toString());
 		}
 
 	}
