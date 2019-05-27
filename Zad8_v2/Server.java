@@ -130,8 +130,17 @@ class ClientHandler extends Thread
 			}
 			catch(ParseException e)
 			{
-				System.err.println("Invalid date format");
+				System.err.println(e.getMessage());
 				e.printStackTrace();
+				try
+				{
+					oosCommunication.writeObject(e.getMessage());
+				}
+				catch(IOException e2)
+				{
+					System.err.println(e2.getMessage());
+					e2.printStackTrace();
+				}
 			}
 			catch(ClassNotFoundException e)
 			{
