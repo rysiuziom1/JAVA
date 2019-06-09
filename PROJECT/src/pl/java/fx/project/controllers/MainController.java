@@ -5,6 +5,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainController {
     @FXML
     private TreeView<String> treeView;
@@ -29,6 +32,21 @@ public class MainController {
         treeView.setRoot(root);
 
         textArea.setText("CYCE MARYSI...");
+
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                treeView.getRoot().getChildren().add(new TreeItem<>("DUPA"));
+                this.cancel();
+            }
+        };
+        Timer timer = new Timer(true);
+        timer.scheduleAtFixedRate(timerTask, 0, 5000);
     }
 
 }
