@@ -29,6 +29,6 @@ public class MainController {
         treeView.setRoot(root);
 
         textArea.setText("CYCE MARYSI...");
-
     }
+
 }
