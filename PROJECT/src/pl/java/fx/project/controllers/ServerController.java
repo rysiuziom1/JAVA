@@ -40,7 +40,7 @@ public class ServerController {
 
     public void init() {
         RefreshFileTree refreshTask = new RefreshFileTree(serverTreeView, allFilesList);
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
         scheduler.scheduleWithFixedDelay(refreshTask, 0, 1, TimeUnit.SECONDS);
         ServerSocket serverSocket = null;
         try {
@@ -53,23 +53,39 @@ public class ServerController {
         ServerSocket finalServerSocket = serverSocket;
         Runnable acceptClientTask = () -> Platform.runLater(() -> {
             Socket socket = null;
-            ObjectInputStream inputStream = null;
-            ObjectOutputStream outputStream = null;
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
 
             try {
                 socket = finalServerSocket.accept();
-                inputStream = new ObjectInputStream(socket.getInputStream());
-                outputStream = new ObjectOutputStream(socket.getOutputStream());
-                ObjectInputStream finalInputStream = inputStream;
+                inputStream = socket.getInputStream();
+                outputStream = socket.getOutputStream();
+                InputStream finalInputStream = inputStream;
+                OutputStream finalOutputStream = outputStream;
                 Runnable listenClientTask = () -> Platform.runLater(() -> {
                     try {
-                        String received = (String) finalInputStream.readObject();
-                        if(received.equalsIgnoreCase("Send file")) {
-                            
+                        InputStreamReader reader = new InputStreamReader(finalInputStream);
+                        BufferedReader buffered = new BufferedReader(reader);
+                        String received = buffered.readLine();
+                        if(received.startsWith("SEND")) {
+                            String fileName = received.split(" ")[1];
+                            String fileOwner = received.split(" ")[2];
+                            FileOutputStream out = new FileOutputStream(fileOwner + "\\" + fileName);
+                            byte[] bytes = new byte[16*1024];
+                            int count;
+                            while((count = finalInputStream.read(bytes)) > 0) {
+                                out.write(bytes, 0, count);
+                            }
+                            out.close();
+                        }
+                        else if(received.startsWith("GET")) {
+                            String owner = received.split(" ")[1];
+                            ObjectOutputStream objectOutputStream = new ObjectOutputStream(finalOutputStream);
+                            ArrayList<String> files = new ArrayList<>();
+                            FileTreeBuilder.createFileList(new File(owner), files);
+                            objectOutputStream.writeObject(files);
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
 

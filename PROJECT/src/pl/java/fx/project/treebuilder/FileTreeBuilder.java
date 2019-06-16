@@ -64,7 +64,7 @@ public class FileTreeBuilder {
         treeView.setRoot(rootItem);
     }
 
-    public void createFileList(File file, List<String> files) {
+    public static void createFileList(File file, List<String> files) {
         files.add(file.getName());
         if(file.isDirectory()) {
             for(File f : file.listFiles())
